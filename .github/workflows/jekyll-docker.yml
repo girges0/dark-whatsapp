@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Dark Chat WhatsApp</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+margin:0;
+font-family:sans-serif;
+background:#0b141a;
+display:flex;
+flex-direction:column;
+height:100vh;
+}
+
+/* LOGIN */
+#login{
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+flex:1;
+color:white;
+}
+
+#login input{
+padding:10px;
+margin:10px;
+border-radius:8px;
+border:none;
+width:200px;
+}
+
+/* HEADER */
+.header{
+height:56px;
+background:#075E54;
+color:white;
+display:flex;
+align-items:center;
+padding:10px;
+font-size:18px;
+}
+
+.avatar{
+width:40px;
+height:40px;
+border-radius:50%;
+background:#2a9df4;
+display:flex;
+align-items:center;
+justify-content:center;
+margin-right:10px;
+font-weight:bold;
+}
+
+/* CHAT */
+.chat{
+flex:1;
+overflow-y:auto;
+padding:5px;
+max-height:calc(100vh - 112px);
+}
+
+.message{
+max-width:80%;
+padding:10px 12px;
+border-radius:12px;
+margin:6px 0;
+word-wrap:break-word;
+position:relative;
+}
+
+.me{
+background:#005c4b;
+color:white;
+margin-left:auto;
+}
+
+.other{
+background:#202c33;
+color:white;
+}
+
+.time{
+font-size:11px;
+opacity:0.7;
+margin-left:5px;
+}
+
+.reply{
+border-left:3px solid #25D366;
+padding-left:6px;
+font-size:12px;
+margin-bottom:4px;
+opacity:0.8;
+}
+
+/* INPUT */
+.inputBox{
+height:56px;
+display:flex;
+align-items:center;
+padding:5px 8px;
+background:#202c33;
+}
+
+.messageInput{
+flex:1;
+height:40px;
+border-radius:20px;
+border:none;
+padding:0 15px;
+background:#2a3942;
+color:white;
+font-size:15px;
+}
+
+.sendBtn{
+width:45px;
+height:45px;
+border-radius:50%;
+background:#25D366;
+border:none;
+color:white;
+font-size:18px;
+margin-left:8px;
+cursor:pointer;
+}
+
+.reactionsDisplay{
+display:flex;
+gap:3px;
+font-size:12px;
+margin-bottom:2px;
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+<h2>Enter Your Code</h2>
+<input type="password" id="codeInput" placeholder="Enter Code">
+<button onclick="login()">Login</button>
+</div>
+
+<!-- CHAT -->
+<div id="chatPage" style="display:none;flex-direction:column;height:100vh;">
+<div class="header">
+<div class="avatar" id="avatar">U</div>
+<div id="chatTitle">Dark Chat</div>
+</div>
+
+<div class="chat" id="chat"></div>
+
+<div class="inputBox">
+<input class="messageInput" id="messageInput" placeholder="Message" onkeydown="checkEnter(event)">
+<input type="file" id="fileInput" onchange="uploadFile()">
+<button class="sendBtn" onclick="sendMessage()">➤</button>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+// Firebase config
+const firebaseConfig = {
+apiKey: "AIzaSyD8IX3-ExCCvMb3NRjb2gw5CsCFLbNH8Uk",
+authDomain: "dark-whats-app.firebaseapp.com",
+databaseURL: "https://dark-whats-app-default-rtdb.firebaseio.com",
+projectId: "dark-whats-app",
+storageBucket: "dark-whats-app.firebasestorage.app",
+messagingSenderId: "806320754204",
+appId: "1:806320754204:web:34470ac5b862466621d9d9",
+measurementId: "G-TCC4KGPEQY"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const storage = getStorage(app);
+const messagesRef = ref(db,"messages");
+
+// Users
+const users = {
+"1234": {name:"Girges", admin:true}, 
+"2222": {name:"Beshoy", admin:false},
+"3333": {name:"Youssef", admin:false},
+"4444": {name:"Armia", admin:false}
+};
+
+let currentUser = null;
+
+// LOGIN
+window.login = function(){
+let code = document.getElementById("codeInput").value;
+if(users[code]){
+currentUser = users[code];
+document.getElementById("login").style.display="none";
+document.getElementById("chatPage").style.display="flex";
+document.getElementById("avatar").innerText=currentUser.name.charAt(0);
+}else{
+alert("Invalid code!");
+}
+}
+
+// Send message
+window.sendMessage = function(){
+const input = document.getElementById("messageInput");
+if(input.value==="") return;
+push(messagesRef,{
+text:input.value,
+name:currentUser.name,
+admin:currentUser.admin,
+time:new Date().toLocaleTimeString()
+});
+input.value="";
+}
+
+// Enter key
+window.checkEnter = function(e){
+if(e.key==="Enter") sendMessage();
+}
+
+// Upload file
+window.uploadFile = function(){
+  const file = document.getElementById("fileInput").files[0];
+  if(!file) return;
+
+  const fileRef = sRef(storage, "chatFiles/" + Date.now() + "_" + file.name);
+  
+  uploadBytes(fileRef, file).then(snapshot => {
+    getDownloadURL(fileRef).then(url => {
+      push(messagesRef,{
+        text: url,
+        name: currentUser.name,
+        admin: currentUser.admin,
+        time: new Date().toLocaleTimeString(),
+        file: true,
+        fileName: file.name
+      });
+    });
+  });
+
+  document.getElementById("fileInput").value = "";
+}
+
+// Receive messages
+onChildAdded(messagesRef,(data)=>{
+const m=data.val();
+const id=data.key;
+addMessage(m,id);
+notify(m.name,m.text);
+})
+
+// Add message to UI
+function addMessage(m,id){
+const chat=document.getElementById("chat");
+const div=document.createElement("div");
+div.className = m.name===currentUser.name ? "message me" : "message other";
+div.dataset.id=id;
+
+// Reply placeholder
+let replyText = m.reply ? `<div class="reply">Reply: ${m.reply.text}</div>` : "";
+
+// File handling
+let fileHTML = "";
+if(m.file){
+  if(m.fileName.match(/\.(jpeg|jpg|png|gif)$/i)){
+    fileHTML = `<div><img src="${m.text}" style="max-width:150px;border-radius:8px;"></div>`;
+  } else {
+    fileHTML = `<div><a href="${m.text}" target="_blank" style="color:#25D366;text-decoration:underline;">${m.fileName}</a></div>`;
+  }
+}
+
+// Reactions
+let reactionHTML = "";
+if(m.reactions){
+for(let e in m.reactions){
+reactionHTML += `<span style="margin-right:3px">${e} ${m.reactions[e]}</span>`;
+}
+}
+
+// Buttons
+let editBtn = (m.name===currentUser.name || currentUser.admin) ? `<button onclick="editMessage('${id}')">edit</button>` : "";
+let deleteBtn = currentUser.admin ? `<button onclick="deleteMessage('${id}')">delete</button>` : "";
+
+// Build message
+div.innerHTML = `
+<div>${m.name}</div>
+${replyText}
+<div>${fileHTML || m.text}</div>
+<div class="reactionsDisplay">${reactionHTML}</div>
+<span class="time">${m.time}</span>
+${editBtn}
+${deleteBtn}
+`;
+
+chat.appendChild(div);
+chat.scrollTop = chat.scrollHeight;
+}
+
+// Delete for all
+window.deleteMessage=function(id){
+remove(ref(db,"messages/"+id));
+const el=document.querySelector(`.message[data-id='${id}']`);
+if(el) el.remove();
+}
+
+// Edit message
+window.editMessage=function(id){
+let currentText = document.querySelector(`.message[data-id='${id}'] div:nth-child(3)`).innerText;
+let newText=prompt("Edit message", currentText);
+if(newText){
+update(ref(db,"messages/"+id),{text:newText});
+document.querySelector(`.message[data-id='${id}'] div:nth-child(3)`).innerText=newText;
+}
+}
+
+// Reactions
+window.react=function(id,emoji){
+const reactionRef = ref(db,"messages/"+id+"/reactions/"+emoji);
+get(reactionRef).then(snap=>{
+let count = snap.val()||0;
+update(ref(db,"messages/"+id+"/reactions"),{[emoji]:count+1});
+});
+}
+
+// Notifications
+Notification.requestPermission();
+function notify(title,text){
+if(Notification.permission==="granted"){
+new Notification(title,{body:text});
+}
+}
+
+</script>
+</body>
+</html>
