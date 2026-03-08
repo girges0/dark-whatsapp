@@ -1,345 +1,301 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Dark Chat</title>
+<title>Dark Chat WhatsApp</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-html, body{
-  margin:0;
-  padding:0;
-  font-family:Arial,sans-serif;
-  background:#e5ddd5;
-  height:100%;
+body{
+margin:0;
+font-family:sans-serif;
+background:#0b141a;
+display:flex;
+flex-direction:column;
+height:100vh;
 }
 
-/* Login */
+/* LOGIN */
 #login{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+flex:1;
+color:white;
 }
+
 #login input{
-  padding:15px;
-  font-size:18px;
-  margin:10px;
-  width:80%;
-  max-width:400px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-#login button{
-  padding:15px 25px;
-  background:#25D366;
-  border:none;
-  color:white;
-  cursor:pointer;
-  font-size:18px;
-  border-radius:10px;
+padding:10px;
+margin:10px;
+border-radius:8px;
+border:none;
+width:200px;
 }
 
-/* Chat Page */
-#chatPage{
-  display:none;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
+/* HEADER */
+.header{
+height:56px;
+background:#075E54;
+color:white;
+display:flex;
+align-items:center;
+padding:10px;
+font-size:18px;
 }
 
-/* Header */
-#onlineList{
-  height:56px;
-  line-height:56px;
-  padding:0 16px;
-  background:#075e54;
-  color:white;
-  font-size:16px;
-  font-weight:bold;
+.avatar{
+width:40px;
+height:40px;
+border-radius:50%;
+background:#2a9df4;
+display:flex;
+align-items:center;
+justify-content:center;
+margin-right:10px;
+font-weight:bold;
 }
 
-/* Chat area */
-#chat{
-  flex:1;
-  overflow-y:auto;
-  padding:10px 16px;
-  display:flex;
-  flex-direction:column;
+/* CHAT */
+.chat{
+flex:1;
+overflow-y:auto;
+padding:5px;
+max-height:calc(100vh - 112px);
 }
 
-/* Messages */
-.msg{
-  max-width:75%;
-  padding:8px 12px;
-  margin:6px 0;
-  border-radius:18px;
-  font-size:15px;
-  word-wrap:break-word;
-  position:relative;
-  cursor:pointer;
-}
-.me{background:#dcf8c6;align-self:flex-end;}
-.other{background:white;align-self:flex-start;}
-.adminMsg{background:#6696ff;align-self:flex-start;}
-.name{font-size:12px;color:#555;margin-bottom:4px;}
-#typing{
-  font-size:13px;
-  color:gray;
-  margin-left:10px;
-  margin-bottom:4px;
+.message{
+max-width:80%;
+padding:10px 12px;
+border-radius:12px;
+margin:6px 0;
+word-wrap:break-word;
+position:relative;
 }
 
-/* Send Box */
-#sendBox{
-  height:56px;
-  display:flex;
-  padding:8px 10px;
-  background:#f0f0f0;
-  align-items:center;
-  box-shadow:0 -2px 5px rgba(0,0,0,0.1);
+.me{
+background:#005c4b;
+color:white;
+margin-left:auto;
 }
-#msg{
-  flex:1;
-  height:40px;
-  padding:8px 12px;
-  border-radius:25px;
-  border:1px solid #ccc;
-  font-size:16px;
-  outline:none;
-}
-#sendBtn{
-  margin-left:10px;
-  padding:10px 16px;
-  border:none;
-  background:#25D366;
-  color:white;
-  border-radius:50px;
-  cursor:pointer;
-  font-size:16px;
-}
-#sendBtn:hover{background:#20b858;}
-#fileInput{margin-left:5px;cursor:pointer;}
 
-/* Context Menu */
-#contextMenu{
-  position:absolute;
-  background:white;
-  box-shadow:0 0 10px rgba(0,0,0,0.3);
-  border-radius:8px;
-  display:none;
-  z-index:1000;
-  min-width:160px;
+.other{
+background:#202c33;
+color:white;
 }
-#contextMenu button{
-  width:100%;
-  padding:12px;
-  border:none;
-  background:none;
-  text-align:left;
-  cursor:pointer;
-  border-bottom:1px solid #ddd;
-  font-size:16px;
-}
-#contextMenu button:last-child{border-bottom:none;}
-#contextMenu button:hover{background:#f0f0f0;}
 
-img{max-width:70%;border-radius:10px;}
-
-/* Responsive */
-@media screen and (max-width:600px){
-  #msg{font-size:15px;}
-  .msg{font-size:14px; padding:6px 10px;}
-  #sendBtn{font-size:14px; padding:8px 14px;}
+.time{
+font-size:11px;
+opacity:0.7;
+margin-left:5px;
 }
-@media screen and (min-width:1200px){
-  #msg{font-size:16px;}
-  .msg{font-size:16px; padding:10px 14px;}
-  #sendBtn{font-size:16px; padding:10px 16px;}
+
+.reply{
+border-left:3px solid #25D366;
+padding-left:6px;
+font-size:12px;
+margin-bottom:4px;
+opacity:0.8;
+}
+
+/* INPUT */
+.inputBox{
+height:56px;
+display:flex;
+align-items:center;
+padding:5px 8px;
+background:#202c33;
+}
+
+.messageInput{
+flex:1;
+height:40px;
+border-radius:20px;
+border:none;
+padding:0 15px;
+background:#2a3942;
+color:white;
+font-size:15px;
+}
+
+.sendBtn{
+width:45px;
+height:45px;
+border-radius:50%;
+background:#25D366;
+border:none;
+color:white;
+font-size:18px;
+margin-left:8px;
+cursor:pointer;
+}
+
+.reactionsDisplay{
+display:flex;
+gap:3px;
+font-size:12px;
+margin-bottom:2px;
 }
 </style>
 </head>
 <body>
 
 <div id="login">
-<h2>Dark Chat</h2>
-<input id="code" placeholder="Enter Secret Code">
+<h2>Enter Your Code</h2>
+<input type="password" id="codeInput" placeholder="Enter Code">
 <button onclick="login()">Login</button>
 </div>
 
-<div id="chatPage">
-<div id="onlineList"></div>
-<div id="chat"></div>
-<div id="typing"></div>
-<div id="sendBox">
-<input id="msg" placeholder="Type a message">
-<input type="file" id="fileInput" accept="image/*">
-<button id="sendBtn" onclick="send()">Send</button>
-</div>
+<div id="chatPage" style="display:none;flex-direction:column;height:100vh;">
+<div class="header">
+<div class="avatar" id="avatar">U</div>
+<div id="chatTitle">Dark Chat</div>
 </div>
 
-<div id="contextMenu">
-<button id="deleteBtnMenu">Delete ❌</button>
-<button id="blockBtnMenu">Block ⛔</button>
-<button id="unblockBtnMenu">Unblock ✅</button>
+<div class="chat" id="chat"></div>
+
+<div class="inputBox">
+<input class="messageInput" id="messageInput" placeholder="Message" onkeydown="checkEnter(event)">
+<button class="sendBtn" onclick="sendMessage()">➤</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyD8IX3-ExCCvMb3NRjb2gw5CsCFLbNH8Uk",
 authDomain: "dark-whats-app.firebaseapp.com",
 databaseURL: "https://dark-whats-app-default-rtdb.firebaseio.com",
-projectId: "dark-whats-app"
+projectId: "dark-whats-app",
+storageBucket: "dark-whats-app.firebasestorage.app",
+messagingSenderId: "806320754204",
+appId: "1:806320754204:web:34470ac5b862466621d9d9",
+measurementId: "G-TCC4KGPEQY"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const messagesRef = ref(db,"messages");
 
-let username = "";
-let isAdmin = false;
-const codes = {
+const users = {
 "1234": {name:"Girges", admin:true}, 
 "2222": {name:"Beshoy", admin:false},
 "3333": {name:"Youssef", admin:false},
 "4444": {name:"Armia", admin:false}
 };
 
-let blockedUsers = [];
-let currentContextKey = null;
-let currentContextUser = null;
+let currentUser = null;
 
-/* Login */
-function login(){
-let code = document.getElementById("code").value;
-if(codes[code]){
-username = codes[code].name;
-isAdmin = codes[code].admin;
+// LOGIN
+window.login = function(){
+let code = document.getElementById("codeInput").value;
+if(users[code]){
+currentUser = users[code];
 document.getElementById("login").style.display="none";
 document.getElementById("chatPage").style.display="flex";
-set(ref(db,"online/"+username),true);
-}else{alert("Wrong Code");}
+document.getElementById("avatar").innerText=currentUser.name.charAt(0);
+}else{
+alert("Invalid code!");
+}
 }
 
-/* Online list */
-onValue(ref(db,"online"),(snap)=>{
-let val = snap.val()||{};
-let list = Object.keys(val).filter(u=>val[u]).join(", ");
-document.getElementById("onlineList").innerText="Online: "+list;
+// Send message
+window.sendMessage = function(){
+const input = document.getElementById("messageInput");
+if(input.value==="") return;
+push(messagesRef,{
+text:input.value,
+name:currentUser.name,
+admin:currentUser.admin,
+time:new Date().toLocaleTimeString()
 });
-window.onbeforeunload=()=>{if(username){set(ref(db,"online/"+username),false);}};
-
-/* Send message */
-function send(){
-if(blockedUsers.includes(username)) return alert("You are blocked!");
-let input = document.getElementById("msg");
-let text = input.value.trim();
-if(text==="") return;
-push(ref(db,"chat"),{name:username,text:text,time:Date.now(),admin:isAdmin});
 input.value="";
-set(ref(db,"typing"),"");
 }
 
-/* Send image */
-document.getElementById("fileInput").addEventListener("change",(e)=>{
-let file = e.target.files[0];
-if(!file) return;
-let reader = new FileReader();
-reader.onload = function(){
-push(ref(db,"chat"),{name:username,text:"[Image]",img:reader.result,time:Date.now(),admin:isAdmin});
-};
-reader.readAsDataURL(file);
-e.target.value="";
-});
-
-/* Typing */
-document.getElementById("msg").addEventListener("input",()=>{
-set(ref(db,"typing"),username+" typing...");
-setTimeout(()=>set(ref(db,"typing"),""),1000);
-});
-onValue(ref(db,"typing"),snap=>{
-document.getElementById("typing").innerText = snap.val()||"";
-});
-
-/* Context menu */
-const contextMenu = document.getElementById("contextMenu");
-const deleteBtnMenu = document.getElementById("deleteBtnMenu");
-const blockBtnMenu = document.getElementById("blockBtnMenu");
-const unblockBtnMenu = document.getElementById("unblockBtnMenu");
-document.addEventListener("click",()=>{contextMenu.style.display="none";});
-
-deleteBtnMenu.onclick = ()=>{
-if(currentContextKey){
-remove(ref(db,"chat/"+currentContextKey))
-.then(()=>{contextMenu.style.display="none";})
-.catch(err=>alert(err));
+// Enter key
+window.checkEnter = function(e){
+if(e.key==="Enter") sendMessage();
 }
-};
-blockBtnMenu.onclick = ()=>{
-if(currentContextUser && !blockedUsers.includes(currentContextUser)){blockedUsers.push(currentContextUser); alert(currentContextUser+" blocked"); contextMenu.style.display="none";}
-};
-unblockBtnMenu.onclick = ()=>{
-if(currentContextUser){let i = blockedUsers.indexOf(currentContextUser); if(i>-1) blockedUsers.splice(i,1); alert(currentContextUser+" unblocked"); contextMenu.style.display="none";}
-};
 
-/* Show messages */
-onChildAdded(ref(db,"chat"),(data)=>{
-let m = data.val();
-let key = data.key;
-let div = document.createElement("div");
-div.dataset.key = key;
-div.dataset.user = m.name;
+// Receive messages
+onChildAdded(messagesRef,(data)=>{
+const m=data.val();
+const id=data.key;
+addMessage(m,id);
+notify(m.name,m.text);
+})
 
-if(m.admin) div.classList.add("adminMsg");
-else if(m.name==username) div.classList.add("me");
-else div.classList.add("other");
-div.classList.add("msg");
+// Add message to UI
+function addMessage(m,id){
+const chat=document.getElementById("chat");
+const div=document.createElement("div");
+div.className = m.name===currentUser.name ? "message me" : "message other";
+div.dataset.id=id;
 
-let content="<div class='name'>"+m.name+"</div>";
-if(m.text) content+="<div>"+m.text+"</div>";
-if(m.img) content+="<div><img src='"+m.img+"' /></div>";
-div.innerHTML=content;
+// Reply
+let replyText = m.reply ? `<div class="reply">Reply: ${m.reply.text}</div>` : "";
 
-document.getElementById("chat").appendChild(div);
-document.getElementById("chat").scrollTop=document.getElementById("chat").scrollHeight;
-
-/* Double tap / double click for admin context menu */
-if(isAdmin){
-  let lastTap = 0;
-  div.addEventListener("click",(e)=>{
-    const currentTime = new Date().getTime();
-    const tapLength = currentTime - lastTap;
-    if(tapLength < 400 && tapLength > 0){ // double click
-      currentContextKey = div.dataset.key;
-      currentContextUser = div.dataset.user;
-      contextMenu.style.top = e.pageY+"px";
-      contextMenu.style.left = e.pageX+"px";
-      contextMenu.style.display="block";
-    }
-    lastTap = currentTime;
-  });
-
-  div.addEventListener("touchstart",(e)=>{
-    const currentTime = new Date().getTime();
-    const tapLength = currentTime - (div.lastTouch || 0);
-    if(tapLength < 400 && tapLength > 0){
-      currentContextKey = div.dataset.key;
-      currentContextUser = div.dataset.user;
-      contextMenu.style.top = (e.touches[0].pageY)+"px";
-      contextMenu.style.left = (e.touches[0].pageX)+"px";
-      contextMenu.style.display="block";
-    }
-    div.lastTouch = currentTime;
-  });
+// Reactions
+let reactionHTML = "";
+if(m.reactions){
+for(let e in m.reactions){
+reactionHTML += `<span style="margin-right:3px">${e} ${m.reactions[e]}</span>`;
 }
+}
+
+// Buttons
+let editBtn = (m.name===currentUser.name || currentUser.admin) ? `<button onclick="editMessage('${id}')">edit</button>` : "";
+let deleteBtn = currentUser.admin ? `<button onclick="deleteMessage('${id}')">delete</button>` : "";
+
+// Build message
+div.innerHTML = `
+<div>${m.name}</div>
+${replyText}
+<div>${m.text}</div>
+<div class="reactionsDisplay">${reactionHTML}</div>
+<span class="time">${m.time}</span>
+${editBtn}
+${deleteBtn}
+`;
+
+chat.appendChild(div);
+chat.scrollTop = chat.scrollHeight;
+}
+
+// Delete for all
+window.deleteMessage=function(id){
+remove(ref(db,"messages/"+id));
+const el=document.querySelector(`.message[data-id='${id}']`);
+if(el) el.remove();
+}
+
+// Edit message
+window.editMessage=function(id){
+let currentText = document.querySelector(`.message[data-id='${id}'] div:nth-child(3)`).innerText;
+let newText=prompt("Edit message", currentText);
+if(newText){
+update(ref(db,"messages/"+id),{text:newText});
+document.querySelector(`.message[data-id='${id}'] div:nth-child(3)`).innerText=newText;
+}
+}
+
+// Reactions
+window.react=function(id,emoji){
+const reactionRef = ref(db,"messages/"+id+"/reactions/"+emoji);
+get(reactionRef).then(snap=>{
+let count = snap.val()||0;
+update(ref(db,"messages/"+id+"/reactions"),{[emoji]:count+1});
 });
+}
 
-/* Enter to send */
-document.getElementById("msg").addEventListener("keypress",(e)=>{if(e.key==="Enter"){send();}});
+// Notifications
+Notification.requestPermission();
+function notify(title,text){
+if(Notification.permission==="granted"){
+new Notification(title,{body:text});
+}
+}
 
-window.login=login; window.send=send;
 </script>
 </body>
-
 </html>
