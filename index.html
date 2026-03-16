@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Dark Chat</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 
@@ -22,24 +22,16 @@ margin:auto;
 height:100vh;
 display:flex;
 flex-direction:column;
-background:#0b141a;
 }
 
 /* LOGIN */
 #login{
 flex:1;
 display:flex;
-flex-direction:column;
 justify-content:center;
 align-items:center;
+flex-direction:column;
 color:white;
-}
-
-#login input{
-padding:10px;
-border-radius:8px;
-border:none;
-margin:10px;
 }
 
 /* HEADER */
@@ -49,8 +41,7 @@ background:#075E54;
 color:white;
 display:flex;
 align-items:center;
-padding:8px 10px;
-font-size:16px;
+padding:8px;
 }
 
 /* CHAT */
@@ -62,21 +53,28 @@ padding:6px;
 
 .message{
 max-width:78%;
-padding:8px 10px;
+padding:8px;
 border-radius:10px;
 margin:6px 0;
-font-size:14px;
+color:white;
 word-break:break-word;
 }
 
 .me{
 background:#005c4b;
 margin-left:auto;
-color:white;
 }
 
 .other{
 background:#202c33;
+}
+
+/* REPLY BOX */
+.replyBox{
+background:#1f2c34;
+padding:5px;
+font-size:12px;
+display:none;
 color:white;
 }
 
@@ -95,7 +93,7 @@ flex:1;
 height:38px;
 border-radius:20px;
 border:none;
-padding:0 12px;
+padding:0 10px;
 background:#2a3942;
 color:white;
 }
@@ -107,23 +105,6 @@ border-radius:50%;
 border:none;
 background:#25D366;
 color:white;
-font-size:16px;
-}
-
-#fileBtn{
-width:40px;
-height:40px;
-border-radius:50%;
-border:none;
-background:#202c33;
-color:white;
-font-size:18px;
-}
-
-img.chatImage{
-max-width:150px;
-border-radius:8px;
-margin-top:5px;
 }
 
 </style>
@@ -134,8 +115,7 @@ margin-top:5px;
 <div class="app">
 
 <div id="login">
-<h3>Enter Code</h3>
-<input id="codeInput" type="password">
+<input id="codeInput" placeholder="code">
 <button onclick="login()">Login</button>
 </div>
 
@@ -144,10 +124,12 @@ margin-top:5px;
 
 <div id="chat" class="chat"></div>
 
+<div id="replyBox" class="replyBox"></div>
+
 <div class="inputBox">
-<input id="messageInput" class="messageInput" placeholder="Message" onkeydown="enterSend(event)">
+<input id="messageInput" class="messageInput" onkeydown="enterSend(event)">
 <input type="file" id="fileInput" style="display:none" onchange="uploadFile()">
-<button id="fileBtn" onclick="document.getElementById('fileInput').click()">📎</button>
+<button onclick="fileInput.click()">📎</button>
 <button class="sendBtn" onclick="sendMessage()">➤</button>
 </div>
 
@@ -158,56 +140,41 @@ margin-top:5px;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-const firebaseConfig = {
-apiKey: "AIzaSyD8IX3-ExCCvMb3NRjb2gw5CsCFLbNH8Uk",
-authDomain: "dark-whats-app.firebaseapp.com",
-databaseURL: "https://dark-whats-app-default-rtdb.firebaseio.com",
-projectId: "dark-whats-app",
-storageBucket: "dark-whats-app.firebasestorage.app",
-messagingSenderId: "806320754204",
-appId: "1:806320754204:web:34470ac5b862466621d9d9"
+const firebaseConfig={
+apiKey:"AIzaSyD8IX3-ExCCvMb3NRjb2gw5CsCFLbNH8Uk",
+authDomain:"dark-whats-app.firebaseapp.com",
+databaseURL:"https://dark-whats-app-default-rtdb.firebaseio.com",
+projectId:"dark-whats-app",
+storageBucket:"dark-whats-app.firebasestorage.app",
+messagingSenderId:"806320754204",
+appId:"1:806320754204:web:34470ac5b862466621d9d9"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const storage = getStorage(app);
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+const storage=getStorage(app);
 
-const users = {
-"1234": {name:"Girges", admin:true},
-"2222": {name:"Beshoy", admin:false},
-"3333": {name:"Youssef", admin:false},
-"4444": {name:"Armia", admin:false}
+const users={
+"1234":{name:"Girges"},
+"2222":{name:"Beshoy"},
+"3333":{name:"Youssef"},
+"4444":{name:"Armia"}
 };
 
 let currentUser=null;
+let replyData=null;
 
 // LOGIN
 window.login=function(){
-let code=document.getElementById("codeInput").value;
-if(users[code]){
-currentUser=users[code];
+let c=codeInput.value;
+if(users[c]){
+currentUser=users[c];
 login.style.display="none";
 chatPage.style.display="flex";
-}else{
-alert("Wrong Code");
 }
-}
-
-// SEND MESSAGE
-window.sendMessage=function(){
-let input=document.getElementById("messageInput");
-if(input.value==="") return;
-
-push(ref(db,"messages"),{
-text:input.value,
-name:currentUser.name,
-time:Date.now()
-});
-
-input.value="";
 }
 
 // ENTER SEND
@@ -215,68 +182,66 @@ window.enterSend=function(e){
 if(e.key==="Enter") sendMessage();
 }
 
+// SEND
+window.sendMessage=function(){
+let txt=messageInput.value;
+if(txt==="") return;
+
+push(ref(db,"messages"),{
+text:txt,
+name:currentUser.name,
+reply:replyData
+});
+
+messageInput.value="";
+replyBox.style.display="none";
+replyData=null;
+}
+
 // RECEIVE
 onChildAdded(ref(db,"messages"),snap=>{
 let m=snap.val();
-let id=snap.key;
 
 let div=document.createElement("div");
 div.className="message "+(m.name===currentUser.name?"me":"other");
 
-if(m.file){
-if(m.fileType==="image"){
-div.innerHTML=`<b>${m.name}</b><br><img class="chatImage" src="${m.text}">`;
-}else{
-div.innerHTML=`<b>${m.name}</b><br><a href="${m.text}" target="_blank">${m.fileName}</a>`;
-}
-}else{
-div.innerHTML=`<b>${m.name}</b><br>${m.text}`;
+let replyHTML="";
+if(m.reply){
+replyHTML=`<div style="font-size:11px;background:#111;padding:4px;border-left:3px solid #25D366">${m.reply.name}: ${m.reply.text}</div>`;
 }
 
-if(currentUser.admin){
-let del=document.createElement("button");
-del.innerText="Delete";
-del.onclick=()=>remove(ref(db,"messages/"+id));
-div.appendChild(del);
-}
+div.innerHTML=`
+<b>${m.name}</b><br>
+${replyHTML}
+${m.text}
+`;
+
+div.onclick=()=>{
+replyData={name:m.name,text:m.text};
+replyBox.innerHTML="Replying to "+m.name+": "+m.text;
+replyBox.style.display="block";
+};
 
 chat.appendChild(div);
 chat.scrollTop=chat.scrollHeight;
 
-notify(m.name,m.text||"File");
-
 });
 
-// UPLOAD FILE
+// UPLOAD
 window.uploadFile=function(){
-let file=document.getElementById("fileInput").files[0];
-if(!file) return;
+let f=fileInput.files[0];
+let path="files/"+Date.now()+f.name;
+let sr=sRef(storage,path);
 
-let path="files/"+Date.now()+"_"+file.name;
-let storageRef=sRef(storage,path);
-
-uploadBytes(storageRef,file).then(()=>{
-getDownloadURL(storageRef).then(url=>{
-
+uploadBytes(sr,f).then(()=>{
+getDownloadURL(sr).then(url=>{
 push(ref(db,"messages"),{
 text:url,
 name:currentUser.name,
-file:true,
-fileName:file.name,
-fileType:file.type.startsWith("image")?"image":"file"
-});
-
+file:true
 });
 });
-
-}
-
-// NOTIFICATION
-Notification.requestPermission();
-function notify(title,body){
-if(Notification.permission==="granted"){
-new Notification(title,{body:body});
-}
+});
 }
 
 </script>
