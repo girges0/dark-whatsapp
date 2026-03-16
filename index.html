@@ -15,16 +15,15 @@ font-family:sans-serif;
 }
 
 .app{
-width:100%;
 max-width:430px;
 min-width:320px;
-margin:auto;
 height:100vh;
+margin:auto;
 display:flex;
 flex-direction:column;
+background:#0b141a;
 }
 
-/* LOGIN */
 #login{
 flex:1;
 display:flex;
@@ -34,30 +33,28 @@ flex-direction:column;
 color:white;
 }
 
-/* HEADER */
 .header{
-height:52px;
+height:50px;
 background:#075E54;
 color:white;
 display:flex;
 align-items:center;
-padding:8px;
+justify-content:space-between;
+padding:0 10px;
 }
 
-/* CHAT */
 .chat{
 flex:1;
-overflow-y:auto;
+overflow:auto;
 padding:6px;
 }
 
-.message{
-max-width:78%;
+.msg{
 padding:8px;
 border-radius:10px;
 margin:6px 0;
+max-width:75%;
 color:white;
-word-break:break-word;
 }
 
 .me{
@@ -69,42 +66,42 @@ margin-left:auto;
 background:#202c33;
 }
 
-/* REPLY BOX */
 .replyBox{
 background:#1f2c34;
+color:white;
 padding:5px;
 font-size:12px;
 display:none;
-color:white;
 }
 
-/* INPUT */
 .inputBox{
-height:54px;
+height:55px;
 display:flex;
-align-items:center;
 gap:5px;
-padding:6px;
+padding:5px;
 background:#202c33;
 }
 
-.messageInput{
+.input{
 flex:1;
-height:38px;
-border-radius:20px;
 border:none;
+border-radius:20px;
 padding:0 10px;
 background:#2a3942;
 color:white;
 }
 
-.sendBtn{
+.send{
 width:40px;
-height:40px;
-border-radius:50%;
 border:none;
+border-radius:50%;
 background:#25D366;
 color:white;
+}
+
+video{
+width:100%;
+background:black;
 }
 
 </style>
@@ -115,22 +112,29 @@ color:white;
 <div class="app">
 
 <div id="login">
-<input id="codeInput" placeholder="code">
+<h3>Enter Code</h3>
+<input id="code">
 <button onclick="login()">Login</button>
 </div>
 
 <div id="chatPage" style="display:none;flex-direction:column;height:100%;">
-<div class="header">Dark Chat</div>
+
+<div class="header">
+Dark Chat
+<button onclick="startShare()">📺</button>
+</div>
+
+<video id="screenVideo" autoplay></video>
 
 <div id="chat" class="chat"></div>
 
 <div id="replyBox" class="replyBox"></div>
 
 <div class="inputBox">
-<input id="messageInput" class="messageInput" onkeydown="enterSend(event)">
-<input type="file" id="fileInput" style="display:none" onchange="uploadFile()">
-<button onclick="fileInput.click()">📎</button>
-<button class="sendBtn" onclick="sendMessage()">➤</button>
+<input id="msg" class="input" onkeydown="enterSend(event)">
+<input type="file" id="file" style="display:none" onchange="uploadFile()">
+<button onclick="file.click()">📎</button>
+<button class="send" onclick="send()">➤</button>
 </div>
 
 </div>
@@ -144,13 +148,13 @@ import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/fi
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig={
-apiKey:"AIzaSyD8IX3-ExCCvMb3NRjb2gw5CsCFLbNH8Uk",
-authDomain:"dark-whats-app.firebaseapp.com",
-databaseURL:"https://dark-whats-app-default-rtdb.firebaseio.com",
-projectId:"dark-whats-app",
-storageBucket:"dark-whats-app.firebasestorage.app",
-messagingSenderId:"806320754204",
-appId:"1:806320754204:web:34470ac5b862466621d9d9"
+apiKey:"AIzaSyDZoS88xDw7diC4YRVgiNYyiq9Uh-VJWcc",
+authDomain:"discord-8faee.firebaseapp.com",
+databaseURL:"https://discord-8faee-default-rtdb.firebaseio.com",
+projectId:"discord-8faee",
+storageBucket:"discord-8faee.firebasestorage.app",
+messagingSenderId:"605857326712",
+appId:"1:605857326712:web:4f84ca9b3354f8d1f2af8d"
 };
 
 const app=initializeApp(firebaseConfig);
@@ -164,84 +168,89 @@ const users={
 "4444":{name:"Armia"}
 };
 
-let currentUser=null;
-let replyData=null;
+let me=null;
+let reply=null;
 
-// LOGIN
 window.login=function(){
-let c=codeInput.value;
+let c=code.value;
 if(users[c]){
-currentUser=users[c];
+me=users[c];
 login.style.display="none";
 chatPage.style.display="flex";
 }
 }
 
-// ENTER SEND
 window.enterSend=function(e){
-if(e.key==="Enter") sendMessage();
+if(e.key==="Enter") send();
 }
 
-// SEND
-window.sendMessage=function(){
-let txt=messageInput.value;
-if(txt==="") return;
+window.send=function(){
+if(msg.value==="") return;
 
 push(ref(db,"messages"),{
-text:txt,
-name:currentUser.name,
-reply:replyData
+name:me.name,
+text:msg.value,
+reply:reply
 });
 
-messageInput.value="";
+msg.value="";
 replyBox.style.display="none";
-replyData=null;
+reply=null;
 }
 
-// RECEIVE
 onChildAdded(ref(db,"messages"),snap=>{
 let m=snap.val();
 
-let div=document.createElement("div");
-div.className="message "+(m.name===currentUser.name?"me":"other");
+let d=document.createElement("div");
+d.className="msg "+(m.name===me.name?"me":"other");
 
-let replyHTML="";
+let r="";
 if(m.reply){
-replyHTML=`<div style="font-size:11px;background:#111;padding:4px;border-left:3px solid #25D366">${m.reply.name}: ${m.reply.text}</div>`;
+r=`<div style="font-size:11px;background:#111;padding:3px">${m.reply.name}: ${m.reply.text}</div>`;
 }
 
-div.innerHTML=`
-<b>${m.name}</b><br>
-${replyHTML}
-${m.text}
-`;
+d.innerHTML=`<b>${m.name}</b><br>${r}${m.text}`;
 
-div.onclick=()=>{
-replyData={name:m.name,text:m.text};
-replyBox.innerHTML="Replying to "+m.name+": "+m.text;
+d.onclick=()=>{
+reply={name:m.name,text:m.text};
+replyBox.innerHTML="Reply: "+m.text;
 replyBox.style.display="block";
 };
 
-chat.appendChild(div);
+chat.appendChild(d);
 chat.scrollTop=chat.scrollHeight;
-
 });
 
-// UPLOAD
 window.uploadFile=function(){
-let f=fileInput.files[0];
+let f=file.files[0];
 let path="files/"+Date.now()+f.name;
 let sr=sRef(storage,path);
 
 uploadBytes(sr,f).then(()=>{
 getDownloadURL(sr).then(url=>{
 push(ref(db,"messages"),{
-text:url,
-name:currentUser.name,
-file:true
+name:me.name,
+text:url
 });
 });
 });
+}
+
+/* ⭐ SHARE SCREEN */
+window.startShare=async function(){
+
+try{
+let stream=await navigator.mediaDevices.getDisplayMedia({
+video:true,
+audio:false
+});
+
+screenVideo.srcObject=stream;
+
+}catch(e){
+alert("Screen Share not supported");
+}
+
 }
 
 </script>
